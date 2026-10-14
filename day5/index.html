@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Directory</title>
+  <script src="users.js" defer></script>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #333;
+    }
+    h1 { color: #0ba184; }
+    button, input {
+      padding: 10px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background-color: #0ba184;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover { background-color: #088a70; }
+    input { width: 100%; box-sizing: border-box; }
+    #status { font-weight: bold; margin: 10px 0; }
+    ul { list-style: none; padding: 0; }
+    li {
+      background: #fdfdfd;
+      border: 1px solid #e5e7eb;
+      border-left: 5px solid #0ba184;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>User Directory</h1>
+  
+  <button id="load-users">Load users from server</button>
+  
+  <div>
+    <label for="filter-input"><strong>Filter by name:</strong></label>
+    <br>
+    <input id="filter-input" type="text" placeholder="Type a name to filter..." />
+  </div>
+
+  <p id="status"></p>
+  <ul id="users-list"></ul>
+
+</body>
+</html>
