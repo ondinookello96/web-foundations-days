@@ -1,2 +1,7 @@
-All of the concepts from day four have not been easy. I will do more practice to understand everything.
-I am waiting for the feedback then know where to improve.
+# Reflection
+
+Building the TicketHub system design across these past eight days was an incredible exercise in scaling and distributed state management. The single most difficult concept I encountered was mastering concurrency control—specifically, preventing race conditions like double-booking when thousands of users attempt to claim the exact same seat simultaneously. I overcame this challenge by combining temporary Redis TTL locks for holding windows, row-level locking via SQL transactions, and strict relational database constraints to guarantee absolute correctness under high-load conditions.
+
+Reflecting on my design choices, I realized that protecting the primary database requires proactive buffering. If I were to improve this architecture further, I would implement more granular rate-limiting at the API gateway layer and introduce a distributed message broker like RabbitMQ to decouple asynchronous order confirmation emails from the core checkout transaction pipeline.
+
+Moving forward, I plan to deepen my knowledge of advanced microservices design patterns, asynchronous event-driven architectures, and containerized deployment workflows using Docker and Kubernetes. This capstone has given me a solid foundational blueprint for building resilient, high-concurrency cloud applications, and I look forward to applying these production-grade engineering principles to my future projects.

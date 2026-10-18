@@ -174,3 +174,15 @@ Justification: Routing all map views directly to the primary database would caus
 
 - **Volume vs. Concentration:** Normal traffic is low-volume and well-distributed across time and database rows. In contrast, the flash sale peak condenses immense user volume into a tiny 10-minute window.
 - **Read-Heavy vs. Write/Lock-Contention:** Normal operations are read-heavy (browsing event listings and static details). The flash sale is an extreme write-and-lock contention event where thousands of users fight for the exact same subset of seats, shifting the primary engineering challenge from read scaling (caches/replicas) to concurrency control and transactional locking (Redis TTLs and database row locks).
+
+## 4. System Trade-Offs & Architectural Decisions
+
+### Trade-Off 1: Virtual Waiting Room vs. Direct Queue Load (User Experience vs. System Protection)
+
+- **The Choice:** Implement an active virtual waiting room (throttling entry into the checkout funnel) rather than allowing all 200,000 concurrent users to hammer the primary API and database simultaneously.
+- **Trade-Off:** While the waiting room introduces artificial friction and potential drop-offs for eager users who dislike queuing, it fundamentally protects the underlying infrastructure from cascading failures, memory exhaustion, and connection pool saturation. Without it, connection thrashing would cause response times to spike into timeouts for everyone.
+
+### Trade-Off 2: Read Replicas with Eventual Consistency vs. Immediate Primary Reads (Scalability vs. Data Freshness)
+
+- **The Choice:** Route high-volume seat browsing and venue mapping traffic to read replicas, reserving direct primary database queries strictly for checkout transactions and row-locking.
+- **Trade-Off:** Read replicas introduce a slight replication lag (typically milliseconds to seconds), meaning a user might occasionally view a seat as "available" on their screen that was just claimed moments prior. We accept this minimal freshness delay because forcing all read queries onto the primary database would bottleneck throughput and invalidate our concurrency safeguards.
