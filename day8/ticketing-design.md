@@ -180,9 +180,9 @@ Justification: Routing all map views directly to the primary database would caus
 ### Trade-Off 1: Virtual Waiting Room vs. Direct Queue Load (User Experience vs. System Protection)
 
 - **The Choice:** Implement an active virtual waiting room (throttling entry into the checkout funnel) rather than allowing all 200,000 concurrent users to hammer the primary API and database simultaneously.
-- **Trade-Off:** While the waiting room introduces artificial friction and potential drop-offs for eager users who dislike queuing, it fundamentally protects the underlying infrastructure from cascading failures, memory exhaustion, and connection pool saturation. Without it, connection thrashing would cause response times to spike into timeouts for everyone.
+- **Trade-Off:** While the waiting room introduces artificial friction and potential drop-offs for eager users who dislike queuing, it fundamentally protects the underlying infrastructure from cascading failures, memory exhaustion, and connection pool saturation. Without it, connection thrashing would cause response times to spike into timeouts for everyone, completely degrading service availability.
 
 ### Trade-Off 2: Read Replicas with Eventual Consistency vs. Immediate Primary Reads (Scalability vs. Data Freshness)
 
-- **The Choice:** Route high-volume seat browsing and venue mapping traffic to read replicas, reserving direct primary database queries strictly for checkout transactions and row-locking.
-- **Trade-Off:** Read replicas introduce a slight replication lag (typically milliseconds to seconds), meaning a user might occasionally view a seat as "available" on their screen that was just claimed moments prior. We accept this minimal freshness delay because forcing all read queries onto the primary database would bottleneck throughput and invalidate our concurrency safeguards.
+- **The Choice:** Route high-volume seat browsing, event metadata, and venue mapping traffic to read replicas, reserving direct primary database queries strictly for checkout transactions, seat reservation locks, and payment processing.
+- **Trade-Off:** Read replicas introduce a slight replication lag (typically milliseconds to seconds), meaning a user might occasionally view a seat as "available" on their browser that was just claimed moments prior by another buyer. We accept this minimal freshness delay because forcing all read queries onto the primary database would bottleneck write throughput, cripple connection limits, and invalidate our strict concurrency safeguards during the flash sale peak.
