@@ -153,3 +153,24 @@ Eventual Consistency for Seat Maps vs. Strict Real-time Accuracy:
 Trade-off: Showing seat availability via cached replicas might lag by a fraction of a second.
 
 Justification: Routing all map views directly to the primary database would cause bottlenecking. Using cached seat status for browsing combined with strict locking only at the moment of holding/booking balances high read scalability with absolute transactional correctness.
+
+## 2. Traffic Estimates & Comparison
+
+### Baseline (Normal Day)
+
+- **Registered Users:** 2,000,000 users.
+- **Daily Active Visitors:** 50,000 visitors.
+- **Page Views:** 50,000 visitors $\times$ 10 pages/day = **500,000 page views/day** ($\approx$ 5.8 requests/sec average).
+- **Tickets Sold:** **5,000 tickets sold/day**.
+- **Traffic Pattern:** Steady, predictable, and evenly distributed across various events and hours.
+
+### Flash Sale Peak ("Popular Concert On-Sale")
+
+- **Traffic Spike:** **200,000 concurrent users** attempting to purchase **20,000 seats** within the first **10 minutes** (600 seconds).
+- **Peak Load:** Tens of thousands of simultaneous requests hitting seat-holding and checkout services concurrently—representing a **$100\times$ surge** over baseline traffic.
+- **Traffic Pattern:** Highly localized, volatile, and hyper-concentrated on a single event page and seat map.
+
+### Comparison Analysis
+
+- **Volume vs. Concentration:** Normal traffic is low-volume and well-distributed across time and database rows. In contrast, the flash sale peak condenses immense user volume into a tiny 10-minute window.
+- **Read-Heavy vs. Write/Lock-Contention:** Normal operations are read-heavy (browsing event listings and static details). The flash sale is an extreme write-and-lock contention event where thousands of users fight for the exact same subset of seats, shifting the primary engineering challenge from read scaling (caches/replicas) to concurrency control and transactional locking (Redis TTLs and database row locks).
